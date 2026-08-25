@@ -107,7 +107,7 @@ function drawLivePreview(){
   c.translate(rect.width,0);
   c.scale(-1,1);
   c.filter='brightness(1.02) saturate(1.08)';
-  c.drawImage(video, -dx-dw, dy, dw, dh);
+  c.drawImage(video, dx, dy, dw, dh);
   c.restore();
 
   liveLoopId=requestAnimationFrame(drawLivePreview);
