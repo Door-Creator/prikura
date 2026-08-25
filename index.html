@@ -13,7 +13,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradi
 button{border:0;font:700 12px Montserrat;cursor:pointer}.asset{aspect-ratio:1;border-radius:15px;background:#fff;border:1px solid #f5c2d6;padding:5px}.asset img{width:100%;height:100%;object-fit:contain}.asset:hover{transform:translateY(-2px);box-shadow:0 8px 18px #e67ca944}.frame-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.frame{height:72px;border-radius:14px;background:#fff;border:1px solid #f5c2d6;padding:0;overflow:hidden}.frame img{width:100%;height:100%;object-fit:cover}.frame.active{outline:3px solid var(--pink)}
 .toolrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tool{padding:11px;border-radius:13px;background:#fff0f6;color:#9c3f68}.tool.on{background:var(--hot);color:#fff}.tool.small{padding:9px;font-size:11px}.slider{width:100%;accent-color:var(--pink)}label{font-size:11px;font-weight:700;color:#8b566d;display:flex;justify-content:space-between;margin:8px 0}.swatches{display:flex;gap:8px;flex-wrap:wrap}.sw{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #e8aac2;cursor:pointer}.sw.on{box-shadow:0 0 0 3px var(--pink)}
 .stage{padding:16px;display:flex;flex-direction:column;min-width:0}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.mode{font:700 13px Jua;color:var(--hot)}.status{font:500 10px 'DM Mono';color:#9a687c;text-align:right;max-width:48%}.booth{position:relative;width:100%;aspect-ratio:4/3;border-radius:24px;overflow:hidden;background:#151015;display:flex;align-items:center;justify-content:center;transition:aspect-ratio .2s}
-#video,#photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#video{transform:scaleX(-1);filter:brightness(1.02) saturate(1.08)}#photo{display:none;object-fit:cover;background:#161016}
+#live,#video,#photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#live{display:none;z-index:1}#video{opacity:0;pointer-events:none}#video{transform:scaleX(-1);filter:brightness(1.02) saturate(1.08)}#photo{display:none;object-fit:cover;background:#161016}
 #draw{position:absolute;inset:0;width:100%;height:100%;touch-action:none;pointer-events:none;z-index:8}#stickers{position:absolute;inset:0;pointer-events:none;z-index:7}.sticker-wrap{position:absolute;pointer-events:auto;touch-action:none;cursor:grab}.sticker-wrap img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}.sticker-wrap.selected{outline:2px dashed #fff;filter:drop-shadow(0 0 0 #ff2d8d) drop-shadow(0 7px 9px #5000282e)}
 .handle{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--pink);box-shadow:0 2px 8px #0003;display:none;z-index:5}.selected .handle{display:block}.rotate-h{left:50%;top:-34px;transform:translateX(-50%);cursor:crosshair}.scale-h{right:-11px;bottom:-11px;cursor:nwse-resize}.delete-h{left:-11px;top:-11px;background:var(--hot);color:#fff;font-size:12px;line-height:16px;text-align:center}
 .count{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font:800 100px Montserrat;color:#fff;text-shadow:0 8px 30px #000;z-index:20}.hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:#180f15cc;color:#fff;border:1px solid #ffffff33;border-radius:99px;padding:8px 13px;font:500 10px 'DM Mono';z-index:12;white-space:nowrap}.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}.primary{background:var(--hot);color:#fff;padding:14px;border-radius:15px}.secondary{background:#fff0f6;color:#9c3f68;padding:14px;border-radius:15px}
@@ -36,7 +36,7 @@ button{border:0;font:700 12px Montserrat;cursor:pointer}.asset{aspect-ratio:1;bo
 </aside>
 <main class="stage">
 <div class="topbar"><div class="mode">♡ NYAN PRIKURA — PHOTO / DECORATE / DRAW</div><div class="status" id="status">카메라를 시작해주세요</div></div>
-<div class="booth" id="booth"><video id="video" autoplay muted playsinline></video><canvas id="photo"></canvas><canvas id="draw"></canvas><div id="stickers"></div><img id="frameOverlay"><div class="count" id="count">3</div><div class="hint" id="hint">웹캠 비율에 맞춰 자동으로 프레임이 조정됩니다 ♡</div></div>
+<div class="booth" id="booth"><canvas id="live" aria-label="camera preview"></canvas><video id="video" autoplay muted playsinline></video><canvas id="photo"></canvas><canvas id="draw"></canvas><div id="stickers"></div><img id="frameOverlay"><div class="count" id="count">3</div><div class="hint" id="hint">웹캠 비율에 맞춰 자동으로 프레임이 조정됩니다 ♡</div></div>
 <div class="actions"><button class="primary" id="cameraBtn">◎ 카메라 시작</button><button class="secondary" id="captureBtn">♡ 3초 후 촬영</button><button class="secondary" id="saveBtn">↓ 스티커 사진 저장</button></div><div id="cameraDiag" style="margin-top:10px;padding:10px 12px;border-radius:13px;background:#fff5f9;color:#8b566d;font:500 10px 'DM Mono';line-height:1.55">
 카메라를 시작하면 연결 상태와 오류 원인이 여기에 표시됩니다.
 </div>
@@ -55,7 +55,7 @@ const cats=['cat(1).png','cat(2).png','cat(3).png','cat(4).png'];
 const decos=['heart(1).png','jewelry(1).png','jewelry(3).png','jewelry(5).png','star(1).png'];
 const colors=['#ff2d8d','#ff77b7','#ffffff','#111111','#d9a6ff','#6bd8ff'];
 const frameEl=document.getElementById('frameOverlay'), stickers=document.getElementById('stickers'), booth=document.getElementById('booth');
-const video=document.getElementById('video'), photo=document.getElementById('photo'), draw=document.getElementById('draw'), ctx=draw.getContext('2d');
+const video=document.getElementById('video'), live=document.getElementById('live'), photo=document.getElementById('photo'), draw=document.getElementById('draw'), ctx=draw.getContext('2d'), liveCtx=live.getContext('2d');
 let selected=null, brushColor=colors[0], brushMode='normal', erasing=false, drawing=false, stream=null, captured=false, handOn=false, handBusy=false;
 let history=[], future=[];
 function snapshot(){return {stickers:[...document.querySelectorAll('.sticker-wrap')].map(el=>({file:el.dataset.file,x:parseFloat(el.style.left),y:parseFloat(el.style.top),w:parseFloat(el.style.width),h:parseFloat(el.style.height),rot:parseFloat(el.dataset.rot||0)})),draw:draw.toDataURL('image/png')}}
@@ -80,112 +80,144 @@ document.getElementById('drawBtn').onclick=()=>{brushMode='normal';erasing=false
 document.getElementById('outlineBtn').onclick=()=>{brushMode='outline';erasing=false;draw.style.pointerEvents='auto';document.getElementById('outlineBtn').classList.add('on');document.getElementById('drawBtn').classList.remove('on');document.getElementById('eraseBtn').classList.remove('on')};
 document.getElementById('eraseBtn').onclick=()=>{erasing=true;draw.style.pointerEvents='auto';document.getElementById('eraseBtn').classList.add('on');document.getElementById('drawBtn').classList.remove('on');document.getElementById('outlineBtn').classList.remove('on')};
 document.getElementById('clearDrawBtn').onclick=()=>{pushHistory();ctx.clearRect(0,0,draw.clientWidth,draw.clientHeight)};document.getElementById('size').oninput=e=>document.getElementById('sizeVal').textContent=e.target.value;
+let liveLoopId=null;
+function stopLivePreview(){
+  if(liveLoopId) cancelAnimationFrame(liveLoopId);
+  liveLoopId=null;
+}
+function drawLivePreview(){
+  if(!stream || video.readyState < 2 || !video.videoWidth){
+    liveLoopId=requestAnimationFrame(drawLivePreview);
+    return;
+  }
+  const sw=video.videoWidth, sh=video.videoHeight;
+  const rect=live.getBoundingClientRect();
+  const cw=Math.max(1,Math.round(rect.width*devicePixelRatio));
+  const ch=Math.max(1,Math.round(rect.height*devicePixelRatio));
+  if(live.width!==cw || live.height!==ch){ live.width=cw; live.height=ch; }
+  const c=liveCtx;
+  c.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  c.clearRect(0,0,rect.width,rect.height);
+
+  // Cover-crop the webcam into the booth while mirroring it like a selfie camera.
+  const scale=Math.max(rect.width/sw, rect.height/sh);
+  const dw=sw*scale, dh=sh*scale;
+  const dx=(rect.width-dw)/2, dy=(rect.height-dh)/2;
+  c.save();
+  c.translate(rect.width,0);
+  c.scale(-1,1);
+  c.filter='brightness(1.02) saturate(1.08)';
+  c.drawImage(video, -dx-dw, dy, dw, dh);
+  c.restore();
+
+  liveLoopId=requestAnimationFrame(drawLivePreview);
+}
+
 async function startCamera(){
-  const status = document.getElementById('status');
-  const hint = document.getElementById('hint');
-  const btn = document.getElementById('cameraBtn');
+  const status=document.getElementById('status');
+  const hint=document.getElementById('hint');
+  const diag=document.getElementById('cameraDiag');
+  const btn=document.getElementById('cameraBtn');
 
-  btn.disabled = true;
-  btn.textContent = '◎ 카메라 연결 중...';
-  status.textContent = 'CAMERA · 권한 확인 중';
-  hint.textContent = '브라우저의 카메라 권한 창이 뜨면 “허용”을 눌러주세요 ♡';
+  btn.disabled=true;
+  btn.textContent='◎ 카메라 연결 중...';
+  status.textContent='CAMERA · 연결 중';
+  diag.textContent='카메라 스트림을 연결하고 화면에 직접 표시하는 중입니다 ♡';
 
-  try {
-    if (!window.isSecureContext) {
-      throw new Error('SECURE_CONTEXT_REQUIRED');
-    }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('GETUSERMEDIA_UNAVAILABLE');
-    }
+  try{
+    if(!window.isSecureContext) throw new Error('SECURE_CONTEXT_REQUIRED');
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error('GETUSERMEDIA_UNAVAILABLE');
 
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-    }
+    stopLivePreview();
+    if(stream) stream.getTracks().forEach(t=>t.stop());
 
-    // First try the normal front-facing webcam. If the browser rejects the
-    // constraint, immediately fall back to the simplest possible request.
     let mediaStream;
-    try {
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'user' } },
-        audio: false
+    try{
+      mediaStream=await navigator.mediaDevices.getUserMedia({
+        video:{width:{ideal:1280},height:{ideal:720},facingMode:{ideal:'user'}},
+        audio:false
       });
-    } catch (firstError) {
-      console.warn('Camera first attempt failed:', firstError);
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false
-      });
+    }catch(firstError){
+      console.warn('Preferred camera request failed:',firstError);
+      mediaStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
     }
 
-    stream = mediaStream;
-    video.srcObject = stream;
-    video.muted = true;
-    video.autoplay = true;
-    video.playsInline = true;
+    stream=mediaStream;
+    video.srcObject=stream;
+    video.muted=true;
+    video.autoplay=true;
+    video.playsInline=true;
 
-    await new Promise((resolve, reject) => {
-      if (video.readyState >= 1 && video.videoWidth) return resolve();
-      const timer = setTimeout(() => reject(new Error('VIDEO_METADATA_TIMEOUT')), 7000);
-      video.onloadedmetadata = () => {
+    await new Promise((resolve,reject)=>{
+      const done=()=>{cleanup();resolve()};
+      const fail=()=>{cleanup();reject(new Error('VIDEO_LOAD_FAILED'))};
+      const cleanup=()=>{
         clearTimeout(timer);
-        resolve();
+        video.removeEventListener('loadedmetadata',done);
+        video.removeEventListener('canplay',done);
+        video.removeEventListener('error',fail);
       };
+      const timer=setTimeout(()=>{cleanup();reject(new Error('VIDEO_METADATA_TIMEOUT'))},8000);
+      video.addEventListener('loadedmetadata',done,{once:true});
+      video.addEventListener('canplay',done,{once:true});
+      video.addEventListener('error',fail,{once:true});
+      if(video.readyState>=2 && video.videoWidth) done();
     });
 
     await video.play();
 
-    const track = stream.getVideoTracks()[0];
-    const settings = track && track.getSettings ? track.getSettings() : {};
-    const w = settings.width || video.videoWidth || 1280;
-    const h = settings.height || video.videoHeight || 720;
+    const track=stream.getVideoTracks()[0];
+    const settings=track?.getSettings?.()||{};
+    const w=settings.width||video.videoWidth||1280;
+    const h=settings.height||video.videoHeight||720;
+    booth.style.aspectRatio=`${w}/${h}`;
 
-    booth.style.aspectRatio = `${w}/${h}`;
-    video.style.display = 'block';
-    photo.style.display = 'none';
+    // Do not rely on the browser's <video> renderer. Paint each webcam frame
+    // into our own canvas so the preview remains visible even when Chromium
+    // shows the media-element camera placeholder.
+    video.style.display='none';
+    live.style.display='block';
+    photo.style.display='none';
+    drawLivePreview();
 
-    status.textContent = `CAMERA LIVE · ${w}×${h}`;
-    hint.textContent = '카메라 연결 완료 ♡';
-    btn.disabled = false;
-    btn.textContent = '◎ 카메라 다시 시작';
+    status.textContent=`CAMERA LIVE · ${w}×${h}`;
+    hint.textContent='카메라 연결 완료 ♡';
+    diag.textContent=`CAMERA LIVE · ${w}×${h} · 실시간 미리보기 정상 연결`;
+    btn.disabled=false;
+    btn.textContent='◎ 카메라 다시 시작';
     return true;
+  }catch(e){
+    console.error('NYAN PRIKURA camera error:',e);
+    stopLivePreview();
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    stream=null;
 
-  } catch (e) {
-    console.error('NYAN PRIKURA camera error:', e);
-
-    const names = {
-      NotAllowedError: '카메라 권한이 거부되었습니다.',
-      PermissionDeniedError: '카메라 권한이 거부되었습니다.',
-      NotFoundError: '사용 가능한 카메라를 찾지 못했습니다.',
-      DevicesNotFoundError: '사용 가능한 카메라를 찾지 못했습니다.',
-      NotReadableError: '카메라가 다른 앱에서 사용 중일 수 있습니다.',
-      TrackStartError: '카메라를 시작하지 못했습니다.',
-      OverconstrainedError: '카메라 설정을 맞추지 못했습니다.',
-      SecurityError: '브라우저 보안 설정 때문에 카메라가 차단되었습니다.',
-      AbortError: '카메라 연결이 중단되었습니다.',
-      VIDEO_METADATA_TIMEOUT: '카메라 신호를 받았지만 영상 시작이 지연되고 있습니다.',
-      SECURE_CONTEXT_REQUIRED: 'HTTPS 환경에서 실행해야 카메라를 사용할 수 있습니다.',
-      GETUSERMEDIA_UNAVAILABLE: '이 브라우저에서 카메라 기능을 사용할 수 없습니다.'
+    const names={
+      NotAllowedError:'카메라 권한이 거부되었습니다.',
+      PermissionDeniedError:'카메라 권한이 거부되었습니다.',
+      NotFoundError:'사용 가능한 카메라를 찾지 못했습니다.',
+      DevicesNotFoundError:'사용 가능한 카메라를 찾지 못했습니다.',
+      NotReadableError:'카메라가 다른 앱에서 사용 중일 수 있습니다.',
+      OverconstrainedError:'카메라 설정을 맞추지 못했습니다.',
+      SecurityError:'브라우저 보안 설정 때문에 카메라가 차단되었습니다.',
+      AbortError:'카메라 연결이 중단되었습니다.',
+      VIDEO_METADATA_TIMEOUT:'카메라는 허용됐지만 영상 신호가 시작되지 않았습니다.',
+      VIDEO_LOAD_FAILED:'카메라 영상 요소에서 오류가 발생했습니다.',
+      SECURE_CONTEXT_REQUIRED:'HTTPS 환경에서 실행해야 카메라를 사용할 수 있습니다.',
+      GETUSERMEDIA_UNAVAILABLE:'이 브라우저에서 카메라 기능을 사용할 수 없습니다.'
     };
-
-    const message = names[e.name] || `카메라 오류: ${e.name || 'UnknownError'}`;
-
-    status.textContent = message;
-    hint.innerHTML =
-      `<b>${message}</b><br>` +
-      `현재 주소: ${location.origin}<br>` +
-      `오류 코드: ${e.name || 'UnknownError'}<br>` +
-      `아래 “카메라 다시 시작”을 눌러 다시 시도해보세요.`;
-
-    btn.disabled = false;
-    btn.textContent = '◎ 카메라 다시 시작';
+    const message=names[e.name]||`카메라 오류: ${e.name||'UnknownError'}`;
+    status.textContent=message;
+    hint.innerHTML=`<b>${message}</b><br>오류 코드: ${e.name||'UnknownError'}`;
+    diag.innerHTML=`<b>${message}</b><br>오류 코드: ${e.name||'UnknownError'}<br>카메라 테스트 사이트에서는 정상 작동했다면 이 메시지를 알려주세요.`;
+    btn.disabled=false;
+    btn.textContent='◎ 카메라 다시 시작';
     return false;
   }
 }
 document.getElementById('cameraBtn').onclick=startCamera;
 document.getElementById('captureBtn').onclick=async()=>{if(!stream&&!(await startCamera()))return;const count=document.getElementById('count');count.style.display='flex';for(let n=3;n>0;n--){count.textContent=n;await new Promise(r=>setTimeout(r,700))}count.style.display='none';captureFrame()};
-function captureFrame(){const w=video.videoWidth||1280,h=video.videoHeight||720;photo.width=w;photo.height=h;const p=photo.getContext('2d');p.save();p.translate(w,0);p.scale(-1,1);const beauty=+document.getElementById('beauty').value,pink=+document.getElementById('pink').value;p.filter=`brightness(${1+beauty/250}) saturate(${1+pink/100}) blur(${beauty/45}px)`;p.drawImage(video,0,0,w,h);p.restore();video.style.display='none';photo.style.display='block';captured=true;document.getElementById('status').textContent='PHOTO CAPTURED ♡'}
+function captureFrame(){const w=video.videoWidth||1280,h=video.videoHeight||720;photo.width=w;photo.height=h;const p=photo.getContext('2d');const beauty=+document.getElementById('beauty').value,pink=+document.getElementById('pink').value;p.filter=`brightness(${1+beauty/250}) saturate(${1+pink/100}) blur(${beauty/45}px)`;p.drawImage(live,0,0,live.width,live.height);p.filter='none';live.style.display='none';video.style.display='none';photo.style.display='block';captured=true;document.getElementById('status').textContent='PHOTO CAPTURED ♡'}
 function drawContain(src,c,w,h){const sw=src.videoWidth||src.width,sh=src.videoHeight||src.height,s=Math.max(w/sw,h/sh),dw=sw*s,dh=sh*s;c.drawImage(src,(w-dw)/2,(h-dh)/2,dw,dh)}
 document.getElementById('saveBtn').onclick=()=>{const br=booth.getBoundingClientRect(),w=1200,h=Math.round(w*br.height/br.width),out=document.createElement('canvas');out.width=w;out.height=h;const c=out.getContext('2d');c.fillStyle='#180f15';c.fillRect(0,0,w,h);if(captured)drawContain(photo,c,w,h);else{c.fillStyle='#ffb5d3';c.fillRect(0,0,w,h)}const sx=w/br.width,sy=h/br.height;if(frameEl.complete&&frameEl.src)c.drawImage(frameEl,0,0,w,h);c.drawImage(draw,0,0,w,h);[...document.querySelectorAll('.sticker-wrap')].forEach(el=>{const r=el.getBoundingClientRect(),cx=(r.left-br.left+r.width/2)*sx,cy=(r.top-br.top+r.height/2)*sy,ww=r.width*sx,hh=r.height*sy,rot=parseFloat(el.dataset.rot||0);const im=el.querySelector('img');c.save();c.translate(cx,cy);c.rotate(rot*Math.PI/180);c.drawImage(im,-ww/2,-hh/2,ww,hh);c.restore()});const a=document.createElement('a');a.download='nyan-prikura-v3.png';a.href=out.toDataURL('image/png');a.click()};
 document.getElementById('beauty').oninput=e=>document.getElementById('beautyVal').textContent=e.target.value+'%';document.getElementById('pink').oninput=e=>document.getElementById('pinkVal').textContent=e.target.value+'%';
