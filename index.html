@@ -40,17 +40,17 @@ button{border:0;font:700 12px Montserrat;cursor:pointer}.asset{aspect-ratio:1;bo
 <div class="actions"><button class="primary" id="cameraBtn">◎ 카메라 시작</button><button class="secondary" id="captureBtn">♡ 3초 후 촬영</button><button class="secondary" id="saveBtn">↓ 스티커 사진 저장</button></div>
 </main>
 <aside class="panel right">
-<h3>BEAUTY / 프리쿠라 보정</h3><div class="bigcat"><img src="assets/cat2.png"></div>
+<h3>BEAUTY / 프리쿠라 보정</h3><div class="bigcat"><img src="cat(2).png"></div>
 <label>뽀샤시 <span id="beautyVal">18%</span></label><input class="slider" id="beauty" type="range" min="0" max="40" value="18"><label>핑크 <span id="pinkVal">12%</span></label><input class="slider" id="pink" type="range" min="0" max="40" value="12">
 <h3>HAND MODE</h3><button class="tool" id="handBtn" style="width:100%">☝ 손동작 인식 켜기</button><div class="mini" style="margin-top:8px">검지 끝을 펜처럼 움직이면 낙서됩니다. 손을 펴지 않아도 되지만 검지가 위로 펴져 있을 때 가장 안정적이에요.</div>
 <h3>QUICK GUIDE</h3><div class="instructions"><b>① 카메라</b> 실제 웹캠의 가로세로 비율을 자동 적용<br><b>② 스티커</b> 클릭 후 이동·회전·크기 조절<br><b>③ 편집</b> 뒤로 / 되돌리기 / 삭제<br><b>④ 브러쉬</b> 일반 / 흰 테두리 / 지우개<br><b>⑤ 저장</b> 프레임 + 사진 + 스티커 + 낙서가 합쳐져 PNG로 저장</div>
 <div class="footer">pink leopard cat universe ♡</div></aside></div>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script>
-const A='assets/';
-const frames=['frame1.png','frame2.png','frame3.png','frame4.png','frame5.png','frame6.png'];
-const cats=['cat1.png','cat2.png','cat3.png','cat4.png'];
-const decos=['heart.png','jewel1.png','jewel3.png','jewel5.png','star.png'];
+const A='';
+const frames=['frame(1).png','frame(2).png','frame(3).png','frame(4).png','frame(5).png','frame(6).png'];
+const cats=['cat(1).png','cat(2).png','cat(3).png','cat(4).png'];
+const decos=['heart(1).png','jewelry(1).png','jewelry(3).png','jewelry(5).png','star(1).png'];
 const colors=['#ff2d8d','#ff77b7','#ffffff','#111111','#d9a6ff','#6bd8ff'];
 const frameEl=document.getElementById('frameOverlay'), stickers=document.getElementById('stickers'), booth=document.getElementById('booth');
 const video=document.getElementById('video'), photo=document.getElementById('photo'), draw=document.getElementById('draw'), ctx=draw.getContext('2d');
@@ -78,7 +78,7 @@ document.getElementById('drawBtn').onclick=()=>{brushMode='normal';erasing=false
 document.getElementById('outlineBtn').onclick=()=>{brushMode='outline';erasing=false;draw.style.pointerEvents='auto';document.getElementById('outlineBtn').classList.add('on');document.getElementById('drawBtn').classList.remove('on');document.getElementById('eraseBtn').classList.remove('on')};
 document.getElementById('eraseBtn').onclick=()=>{erasing=true;draw.style.pointerEvents='auto';document.getElementById('eraseBtn').classList.add('on');document.getElementById('drawBtn').classList.remove('on');document.getElementById('outlineBtn').classList.remove('on')};
 document.getElementById('clearDrawBtn').onclick=()=>{pushHistory();ctx.clearRect(0,0,draw.clientWidth,draw.clientHeight)};document.getElementById('size').oninput=e=>document.getElementById('sizeVal').textContent=e.target.value;
-async function startCamera(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('브라우저가 카메라 API를 지원하지 않아요.');if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false});video.srcObject=stream;await video.play();const w=video.videoWidth||1280,h=video.videoHeight||720;booth.style.aspectRatio=`${w}/${h}`;document.getElementById('status').textContent=`CAMERA LIVE · ${w}×${h}`;document.getElementById('hint').textContent='웹캠 비율 자동 적용 완료 ♡';return true}catch(e){document.getElementById('status').textContent='카메라 실패 · '+e.name;document.getElementById('hint').textContent=e.message||'브라우저의 카메라 권한을 확인해주세요.';return false}}
+async function startCamera(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('브라우저가 카메라 API를 지원하지 않아요.');if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});video.srcObject=stream;await video.play();const w=video.videoWidth||1280,h=video.videoHeight||720;booth.style.aspectRatio=`${w}/${h}`;document.getElementById('status').textContent=`CAMERA LIVE · ${w}×${h}`;document.getElementById('hint').textContent='웹캠 비율 자동 적용 완료 ♡';return true}catch(e){document.getElementById('status').textContent='카메라 실패 · '+e.name; console.error('Camera error:', e);document.getElementById('hint').textContent=e.message||'브라우저의 카메라 권한을 확인해주세요.';return false}}
 document.getElementById('cameraBtn').onclick=startCamera;
 document.getElementById('captureBtn').onclick=async()=>{if(!stream&&!(await startCamera()))return;const count=document.getElementById('count');count.style.display='flex';for(let n=3;n>0;n--){count.textContent=n;await new Promise(r=>setTimeout(r,700))}count.style.display='none';captureFrame()};
 function captureFrame(){const w=video.videoWidth||1280,h=video.videoHeight||720;photo.width=w;photo.height=h;const p=photo.getContext('2d');p.save();p.translate(w,0);p.scale(-1,1);const beauty=+document.getElementById('beauty').value,pink=+document.getElementById('pink').value;p.filter=`brightness(${1+beauty/250}) saturate(${1+pink/100}) blur(${beauty/45}px)`;p.drawImage(video,0,0,w,h);p.restore();video.style.display='none';photo.style.display='block';captured=true;document.getElementById('status').textContent='PHOTO CAPTURED ♡'}
