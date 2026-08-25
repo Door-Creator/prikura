@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NYAN♡PRIKURA — Camera Test</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, "Noto Sans KR", sans-serif;
+    background: linear-gradient(135deg, #ffd1e4, #fff4f8);
+    color: #8d4665;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app {
+    width: min(960px, 100%);
+    background: rgba(255,255,255,.94);
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(180,70,120,.18);
+  }
+  h1 {
+    margin: 0 0 6px;
+    color: #ff1680;
+    font-size: clamp(24px, 4vw, 38px);
+  }
+  .sub { margin: 0 0 22px; color: #a76a83; }
+  .camera {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #171217;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scaleX(-1);
+    background: #171217;
+  }
+  .placeholder {
+    position: absolute;
+    text-align: center;
+    color: #fff;
+    line-height: 1.7;
+    padding: 20px;
+    pointer-events: none;
+  }
+  .placeholder strong {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  button {
+    border: 0;
+    border-radius: 14px;
+    padding: 15px 22px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #ff1680;
+    color: white;
+  }
+  button.secondary {
+    background: #fff0f6;
+    color: #b44c78;
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .status {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #fff4f8;
+    color: #8d4665;
+    min-height: 48px;
+  }
+  .status.ok { background: #edfff5; color: #24734c; }
+  .status.error { background: #fff0f0; color: #b33c4b; }
+  .debug {
+    margin-top: 14px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px;
+    color: #8f7180;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  canvas { display: none; }
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>NYAN♡PRIKURA</h1>
+  <p class="sub">CAMERA TEST — 웹캠 연결만 먼저 확인합니다.</p>
+
+  <section class="camera">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="placeholder" id="placeholder">
+      <strong>카메라를 시작해주세요 ♡</strong>
+      아래 버튼을 눌러 웹캠 권한을 허용하세요.
+    </div>
+  </section>
+
+  <div class="controls">
+    <button id="start">◎ 카메라 시작</button>
+    <button id="stop" class="secondary" disabled>■ 카메라 끄기</button>
+    <button id="shot" class="secondary" disabled>♡ 사진 테스트</button>
+  </div>
+
+  <div id="status" class="status">상태: 아직 카메라를 시작하지 않았습니다.</div>
+  <div id="debug" class="debug"></div>
+  <canvas id="canvas"></canvas>
+</main>
+
+<script>
+const video = document.getElementById("video");
+const startBtn = document.getElementById("start");
+const stopBtn = document.getElementById("stop");
+const shotBtn = document.getElementById("shot");
+const statusBox = document.getElementById("status");
+const debug = document.getElementById("debug");
+const placeholder = document.getElementById("placeholder");
+const canvas = document.getElementById("canvas");
+
+let stream = null;
+
+function setStatus(message, type = "") {
+  statusBox.textContent = message;
+  statusBox.className = "status " + type;
+}
+
+function showDebug(text) {
+  debug.textContent = text;
+}
+
+async function startCamera() {
+  stopCamera(false);
+  setStatus("카메라 권한을 요청하고 있습니다…");
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setStatus("이 브라우저에서 카메라 API를 사용할 수 없습니다. HTTPS 주소인지 확인해주세요.", "error");
+    return;
+  }
+
+  try {
+    // 일부 카메라에서 과도하게 까다로운 제약 조건을 주면 실패할 수 있으므로
+    // 가장 단순한 형태로 먼저 요청합니다.
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false
+    });
+
+    video.srcObject = stream;
+    await video.play();
+
+    placeholder.style.display = "none";
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    shotBtn.disabled = false;
+
+    const track = stream.getVideoTracks()[0];
+    const settings = track ? track.getSettings() : {};
+
+    setStatus("카메라 연결 성공 ♡ 실제 영상이 표시되어야 합니다.", "ok");
+    showDebug(
+      "Camera API: OK\n" +
+      "Track: " + (track ? track.label : "unknown") + "\n" +
+      "Resolution: " + (settings.width || "?") + " × " + (settings.height || "?") + "\n" +
+      "Browser: " + navigator.userAgent
+    );
+  } catch (error) {
+    placeholder.style.display = "block";
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    shotBtn.disabled = true;
+
+    let explanation = error.name + ": " + error.message;
+
+    if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
+      explanation += " — 브라우저의 카메라 권한이 차단되어 있을 가능성이 있습니다.";
+    } else if (error.name === "NotFoundError") {
+      explanation += " — 사용 가능한 카메라를 찾지 못했습니다.";
+    } else if (error.name === "NotReadableError") {
+      explanation += " — 다른 프로그램이 카메라를 사용 중일 가능성이 있습니다.";
+    } else if (error.name === "SecurityError") {
+      explanation += " — 브라우저 보안 정책으로 카메라 접근이 차단되었습니다.";
+    }
+
+    setStatus("카메라 연결 실패: " + explanation, "error");
+    showDebug("getUserMedia error\n" + explanation + "\n\nURL: " + location.href);
+  }
+}
+
+function stopCamera(update = true) {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+
+  video.srcObject = null;
+  placeholder.style.display = "block";
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+  shotBtn.disabled = true;
+
+  if (update) {
+    setStatus("카메라가 꺼졌습니다.");
+    showDebug("");
+  }
+}
+
+function takeTestPhoto() {
+  if (!stream || video.readyState < 2) {
+    setStatus("아직 영상이 준비되지 않았습니다.", "error");
+    return;
+  }
+
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+
+  const ctx = canvas.getContext("2d");
+
+  // 화면 미리보기와 같은 좌우 반전으로 캡처
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  canvas.toBlob(blob => {
+    if (!blob) {
+      setStatus("사진 생성에 실패했습니다.", "error");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "nyan-prikura-camera-test.jpg";
+    a.click();
+
+    setStatus("사진 테스트 성공 ♡ 다운로드가 시작됩니다.", "ok");
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }, "image/jpeg", 0.92);
+}
+
+startBtn.addEventListener("click", startCamera);
+stopBtn.addEventListener("click", () => stopCamera(true));
+shotBtn.addEventListener("click", takeTestPhoto);
+
+window.addEventListener("beforeunload", () => stopCamera(false));
+</script>
+</body>
+</html>
